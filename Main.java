@@ -1,4 +1,4 @@
-import java.awt.image.SinglePixelPackedSampleModel;
+package AVLTree;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -8,7 +8,7 @@ public class Main
 {
     public static void main(String[] args)
     {
-       ISearchTree<String> searchTree=new BinarySearchTree<String>(new Comparator<String>()
+       BinarySearchTree<String> searchTree=new BinarySearchTree<String>(new Comparator<String>()
         {
             @Override
             public int compare(String o1, String o2)
@@ -22,6 +22,8 @@ public class Main
         searchTree.insert("UNIX");
         searchTree.insert("CentOS");
         searchTree.insert("DOS");
+        Node<String> maximumNode=searchTree.getRoot().getMaximumNode();
+        Node<String> minimumNode=searchTree.getRoot().getMinimumNode();
 
         System.out.printf("現在のツリー:\n%s",searchTree.toString());
         BufferedReader input =

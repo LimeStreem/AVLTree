@@ -1,3 +1,4 @@
+package AVLTree;
 import java.util.Comparator;
 
 public class Node<T>
@@ -101,5 +102,17 @@ public class Node<T>
     public void setBalance(int balance)
     {
         this.balance = balance;
+    }
+
+    public Node<T> getMinimumNode()
+    {
+	if(getRightNode()==null)return this;
+	return getRightNode().getMinimumNode();
+    }
+
+    public Node<T> getMaximumNode()
+    {
+	if(getLeftNode()==null)return this;
+	return getLeftNode().getMaximumNode();
     }
 }

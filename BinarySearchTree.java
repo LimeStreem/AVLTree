@@ -1,4 +1,7 @@
+package AVLTree;
+
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.Stack;
 
 public class BinarySearchTree<T> implements ISearchTree<T>
@@ -138,6 +141,18 @@ public class BinarySearchTree<T> implements ISearchTree<T>
         {
             Stack<RootItem<T>>root = new Stack<RootItem<T>>();
             boolean ret=insert(node,getRoot(),root);
+            for (Iterator iterator = root.iterator(); iterator.hasNext();)
+	    {
+		RootItem<T> rootItem = (RootItem<T>) iterator.next();
+		Node<T> currentNode=rootItem.getNode();
+		if(rootItem.getNode().getBalance()>2)
+		{
+
+		}else if(rootItem.getNode().getBalance()<-2)
+		{
+
+		}
+	    }
             //getString();
             return ret;
         }
@@ -152,28 +167,28 @@ public class BinarySearchTree<T> implements ISearchTree<T>
             if(basis.getRightNode()==null)
             {
                 basis.setRightNode(newNode);
-               //basis.setBalance(basis.getBalance()-1);
+               basis.setBalance(basis.getBalance()-1);
                 return true;
             }
             else
             {
                 root.add(new RootItem<T>(basis,RootTyoe.RIGHT));
                 boolean ret=insert(newNode, basis.getRightNode(),root);
-                //if(ret)basis.setBalance(basis.getBalance()-1);
+                if(ret)basis.setBalance(basis.getBalance()-1);
                 return ret;
             }
         }else {
             if(basis.getLeftNode()==null)
             {
                 basis.setLeftNode(newNode);
-               // basis.setBalance(basis.getBalance()+1);
+               basis.setBalance(basis.getBalance()+1);
                 return true;
             }
             else
             {
                 root.add(new RootItem<T>(basis,RootTyoe.LEFT));
                 boolean ret=insert(newNode, basis.getLeftNode(),root);
-               // if(ret)basis.setBalance(basis.getBalance()+1);
+               if(ret)basis.setBalance(basis.getBalance()+1);
                 return ret;
             }
         }
@@ -241,6 +256,8 @@ public class BinarySearchTree<T> implements ISearchTree<T>
             getString(node.getRightNode(), n + 1, builder);
         }
     }
+
+
 
     private class RootItem<T>
     {
