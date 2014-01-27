@@ -131,35 +131,148 @@ public class BinarySearchTree<T> implements ISearchTree<T>
         return false;
     }
 
-    private boolean insert(Node<T> node)
+    private void  insertBreadthFirst(Node<T> node,Node<T> basis)
+    {
+
+        Stack<Node<T>> currentStack=new Stack<Node<T>>();
+       if(node.getRightNode()!=null){currentStack.add(node.getRightNode());
+       node.getRightNode().setBalance(0);}
+        if(node.getLeftNode()!=null){currentStack.add(node.getLeftNode());
+        node.getLeftNode().setBalance(0);}
+        node.setRightNode(null);
+        node.setLeftNode(null);
+        while(currentStack.size()!=0)
+        {
+            Stack<Node<T>> nextStack=new Stack<Node<T>>();
+            for (Node<T> tNode : currentStack)
+            {
+                if(tNode==null){
+                    continue;
+                }
+
+                tNode.setBalance(0);
+               if(tNode.getLeftNode()!=null){
+                nextStack.add(tNode.getRightNode());
+                tNode.setRightNode(null);
+               }
+                if(tNode.getLeftNode()!=null){
+                nextStack.add(tNode.getLeftNode());
+                tNode.setLeftNode(null);
+                }
+                insert(tNode,basis,new Stack<PathItem<T>>());
+            }
+            currentStack=nextStack;
+        }
+    }
+
+    private boolean insert(Node<T> basis)
     {
         if(isEmptyTree())
         {
-            root=node;
+            root=basis;
             return true;
         }else
         {
-            Stack<RootItem<T>>root = new Stack<RootItem<T>>();
-            boolean ret=insert(node,getRoot(),root);
-            for (Iterator iterator = root.iterator(); iterator.hasNext();)
-	    {
-		RootItem<T> rootItem = (RootItem<T>) iterator.next();
-		Node<T> currentNode=rootItem.getNode();
-		if(rootItem.getNode().getBalance()>2)
-		{
+            Stack<PathItem<T>>path = new Stack<PathItem<T>>();
+            boolean ret=insert(basis,getRoot(),path);
+            System.out.println("修正前\n"+toString());
+            int count=0;
+            while(true)
+            {
+                count++;
+                boolean isChanged=false;
+                Stack<Node<T>> currentStack=new Stack<Node<T>>();
+                currentStack.add(root);
+                while (currentStack.size()!=0)
+                {
+                    Stack<Node<T>> nextStack=new Stack<Node<T>>();
+                    for (Node<T> tNode : currentStack)
+                    {
+                        Node<T> pathNode =tNode;
+                        if(pathNode.getBalance()>1)
+                        {
+                            Node<T> altNode = pathNode.getLeftNode().getMinimumNode();
+                            altNode.removeFromParent();
+                            altNode.setBalance(0);
+                            pathNode.setBalance(0);
+                            if(pathNode.isRootNode())
+                            {
+                                root=altNode;
+                            }else if(pathNode.isRightNode())
+                            {
+                                pathNode.getParentNode().setRightNode(altNode);
+                            }else
+                            {
+                                pathNode.getParentNode().setLeftNode(altNode);
+                            }
+                            insertBreadthFirst(pathNode,altNode);
+                            pathNode.setRightNode(null);
+                            pathNode.setLeftNode(null);
+                            Stack<PathItem<T>> dummy=new Stack<PathItem<T>>();
+                            if(altNode.getRightNode()!=null)
+                                insert(pathNode,altNode.getRightNode(),dummy);
+                            else{
+                                altNode.setBalance(altNode.getBalance()-1);
+                                altNode.setRightNode(pathNode);
+                            }
+                            if(tNode.getRightNode()!=null)nextStack.add(tNode.getRightNode());
+                            if(tNode.getLeftNode()!=null)nextStack.add(tNode.getLeftNode());
+                            isChanged=true;
+                            break;
+                        }else if(pathNode.getBalance()<-1)
+                        {
+                            Node<T> altNode = pathNode.getRightNode().getMaximumNode();
+                            altNode.removeFromParent();
+                            altNode.setBalance(0);
+                            pathNode.setBalance(0);
+                            if(pathNode.isRootNode())
+                            {
+                                root=altNode;
+                            }else if(pathNode.isRightNode())
+                            {
+                                pathNode.getParentNode().setRightNode(altNode);
+                            }else
+                            {
+                                pathNode.getParentNode().setLeftNode(altNode);
+                            }
+                            insertBreadthFirst(pathNode,altNode);
+                            pathNode.setRightNode(null);
+                            pathNode.setLeftNode(null);
+                            Stack<PathItem<T>> dummy=new Stack<PathItem<T>>();
+                            if(altNode.getLeftNode()!=null)
+                                insert(pathNode,altNode.getLeftNode(),dummy);
+                            else
+                            {
+                                altNode.setLeftNode(pathNode);
+                                altNode.setBalance(altNode.getBalance()+1);
+                            }
+                            if(tNode.getRightNode()!=null)nextStack.add(tNode.getRightNode());
+                            if(tNode.getLeftNode()!=null)nextStack.add(tNode.getLeftNode());
+                            isChanged=true;
+                            break;
+                        }
+                        if(tNode.getRightNode()!=null)nextStack.add(tNode.getRightNode());
+                        if(tNode.getLeftNode()!=null)nextStack.add(tNode.getLeftNode());
+                    }
+                    if(isChanged){
+                        System.out.printf("Phase%d\n%s\n", count, toString());
+                        break  ;
+                    }
 
-		}else if(rootItem.getNode().getBalance()<-2)
-		{
 
-		}
-	    }
+                    currentStack=nextStack;
+                }
+
+                if(!isChanged)break;
+            }
+            System.out.println("修正後\n"+toString());
             //getString();
             return ret;
         }
     }
 
 
-    private boolean insert(Node<T> newNode,Node<T> basis,Stack<RootItem<T>> root)
+    private boolean insert(Node<T> newNode,Node<T> basis,Stack<PathItem<T>> root)
     {
         if(basis.equals(newNode.getValue()))return false;
         if(basis.isSmall(newNode.getValue()))
@@ -172,7 +285,7 @@ public class BinarySearchTree<T> implements ISearchTree<T>
             }
             else
             {
-                root.add(new RootItem<T>(basis,RootTyoe.RIGHT));
+                root.add(new PathItem<T>(basis,RootTyoe.RIGHT));
                 boolean ret=insert(newNode, basis.getRightNode(),root);
                 if(ret)basis.setBalance(basis.getBalance()-1);
                 return ret;
@@ -186,7 +299,7 @@ public class BinarySearchTree<T> implements ISearchTree<T>
             }
             else
             {
-                root.add(new RootItem<T>(basis,RootTyoe.LEFT));
+                root.add(new PathItem<T>(basis,RootTyoe.LEFT));
                 boolean ret=insert(newNode, basis.getLeftNode(),root);
                if(ret)basis.setBalance(basis.getBalance()+1);
                 return ret;
@@ -259,9 +372,9 @@ public class BinarySearchTree<T> implements ISearchTree<T>
 
 
 
-    private class RootItem<T>
+    private class PathItem<T>
     {
-        private RootItem(Node<T> node, RootTyoe type)
+        private PathItem(Node<T> node, RootTyoe type)
         {
             this.node = node;
             this.type = type;

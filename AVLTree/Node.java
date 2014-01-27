@@ -115,4 +115,15 @@ public class Node<T>
 	if(getLeftNode()==null)return this;
 	return getLeftNode().getMaximumNode();
     }
+
+    public void removeFromParent()
+    {
+        if(isRightNode())
+        {
+            getParentNode().setRightNode(null);
+        }else{
+            getParentNode().setLeftNode(null);
+        }
+        setParentNode(null);
+    }
 }
